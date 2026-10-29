@@ -1,827 +1,588 @@
-<!doctype html>
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Trade Routes: Merchant's Journey</title>
 <style>
-:root{
-  --site-primary:#7a4b2a;
-  --site-secondary:#d6a85f;
-  --site-background:#f4ead8;
-  --site-on-primary:#ffffff;
-  --site-on-secondary:#24180f;
-  --site-on-background:#24180f;
-  --site-font-body:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-  --site-font-heading:Georgia,"Times New Roman",serif;
-  --site-heading-scale:1;
-  --site-spacing-scale:1;
-  --site-radius-scale:1;
-  --site-decoration-opacity:1;
+:root {
+  --bg:#101b19;
+  --panel:#1a2925;
+  --panel2:#22352e;
+  --gold:#edc16c;
+  --text:#f7f0df;
+  --muted:#b9c7b9;
+  --green:#82b68a;
+  --red:#d97766;
 }
-*{box-sizing:border-box}
-body{margin:0;font-family:var(--site-font-body);background:var(--site-background);color:var(--site-on-background)}
-#app{min-height:100vh;background:var(--site-background);padding:calc(22px * var(--site-spacing-scale))}
-h1,h2,h3{font-family:var(--site-font-heading);margin:0}
-.shell{max-width:1100px;margin:auto}
-header{background:var(--site-primary);color:var(--site-on-primary);padding:calc(28px * var(--site-spacing-scale));border-radius:calc(18px * var(--site-radius-scale));box-shadow:0 10px 30px rgba(36,24,15,.15)}
-header h1{font-size:calc(40px * var(--site-heading-scale));letter-spacing:.3px}
-header p{margin:8px 0 0;opacity:.9}
-.grid{display:grid;grid-template-columns:1.2fr .8fr;gap:18px;margin-top:18px}
-.card{background:#fffaf1;border:1px solid #ddc9a8;border-radius:calc(16px * var(--site-radius-scale));padding:20px;box-shadow:0 7px 22px rgba(36,24,15,.08)}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
-.stat{background:#f0dfc0;border-radius:12px;padding:12px;text-align:center}
-.stat b{display:block;font-size:21px;margin-top:4px}
-.map{position:relative;height:350px;overflow:hidden;border-radius:14px;background:#ead3a5;border:1px solid #c9a975}
-.map:before{content:"";position:absolute;inset:0;opacity:var(--site-decoration-opacity);background:
-radial-gradient(circle at 20% 35%,rgba(255,255,255,.42) 0 2px,transparent 3px),
-radial-gradient(circle at 70% 65%,rgba(255,255,255,.35) 0 2px,transparent 3px);
+* { box-sizing:border-box }
+body {
+  margin:0;
+  background:radial-gradient(ellipse at top,#263d32,var(--bg) 70%);
+  color:var(--text);
+  font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
 }
-.route{position:absolute;left:9%;right:9%;top:48%;height:4px;background:#8c633e;transform:rotate(-7deg);transform-origin:center}
-.city{position:absolute;transform:translate(-50%,-50%);text-align:center;font-size:12px;font-weight:700}
-.dot{width:18px;height:18px;border-radius:50%;background:var(--site-primary);border:3px solid #fff;margin:auto;box-shadow:0 2px 5px #6b4a30}
-.city:nth-of-type(1){left:11%;top:58%}.city:nth-of-type(2){left:33%;top:50%}.city:nth-of-type(3){left:55%;top:42%}.city:nth-of-type(4){left:78%;top:34%}.city:nth-of-type(5){left:92%;top:27%}
-.goods{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.good{border:1px solid #ddc9a8;border-radius:12px;padding:12px;background:#fffdf8}
-.good h3{font-size:19px}
-.good p{font-size:13px;color:#604b38;margin:5px 0 10px}
-.goods{grid-template-columns:repeat(3,1fr)}
-.people{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
-.people .person{min-height:190px}
-.person{border:1px solid #ddc9a8;border-radius:12px;padding:12px;background:#fffdf8;text-align:center}
-.avatar{font-size:46px;line-height:1;margin-bottom:7px}
-.person h3{font-size:17px}
-.person p{font-size:12px;color:#604b38;min-height:32px}
-.tradehub{margin-top:14px;padding:15px;border-radius:12px;background:#f0dfc0;display:flex;align-items:center;justify-content:space-between;gap:12px}
-.tradehub .tradeicon{font-size:34px}
-.tradehub h3{font-size:19px}.tradehub p{margin:3px 0 0;font-size:12px;color:#604b38}
-.tradehub button{white-space:nowrap}
-.trade-room{display:none;position:fixed;inset:0;background:rgba(36,24,15,.72);z-index:20;padding:30px;overflow:auto}
-.trade-room-inner{max-width:850px;margin:40px auto;background:#fffaf1;border:2px solid #c9a975;border-radius:18px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
-.trade-room-top{display:flex;justify-content:space-between;align-items:center;gap:15px;border-bottom:1px solid #ddc9a8;padding-bottom:14px}
-.traders-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
-.trader-card{border:1px solid #ddc9a8;border-radius:14px;padding:15px;background:#fffdf8;text-align:center}
-.trader-card .avatar{font-size:55px}.trader-card h3{margin:5px 0}.trader-card p{font-size:12px;color:#604b38;min-height:34px}
-.room-deal{margin-top:16px;padding:16px;background:#f0dfc0;border-radius:14px;display:none}
-.trade-scene{display:none;position:fixed;inset:0;z-index:30;background:linear-gradient(#8aa6b5 0 42%,#b88957 42% 100%);overflow:auto}
-.scene-world{min-height:100vh;position:relative;padding:28px;perspective:900px}
-.scene-room{max-width:1050px;min-height:650px;margin:auto;position:relative;background:linear-gradient(90deg,rgba(85,54,30,.35),transparent 25%,transparent 75%,rgba(85,54,30,.35)),#c99b67;border:10px solid #5b3922;border-radius:18px;box-shadow:0 25px 70px rgba(0,0,0,.35);overflow:hidden}
-.scene-window{position:absolute;top:25px;left:50%;transform:translateX(-50%);width:190px;height:110px;background:#a9d1e5;border:9px solid #5b3922;box-shadow:inset 0 0 0 4px #e5cda7}
-.scene-table{position:absolute;left:50%;bottom:80px;transform:translateX(-50%);width:72%;height:150px;background:#6b4328;border-radius:50%;box-shadow:0 25px 0 #4b2e1d;}
-.scene-table:before{content:"🧵   🌶️   💰";position:absolute;top:35px;left:50%;transform:translateX(-50%);font-size:32px;white-space:nowrap}
-.trader-figure{position:absolute;left:50%;top:95px;transform:translateX(-50%);text-align:center;z-index:3;filter:drop-shadow(0 8px 5px rgba(0,0,0,.25))}
-.trader-figure .head{font-size:92px;line-height:1}.trader-figure .body{width:135px;height:125px;margin:-8px auto 0;background:#5f7891;border-radius:55px 55px 20px 20px;border:5px solid #493326}
-.scene-chair{position:absolute;left:50%;bottom:235px;transform:translateX(-50%);width:180px;height:70px;border:12px solid #4b2e1d;border-bottom:25px solid #4b2e1d;border-radius:18px}
-.scene-dialogue{position:absolute;left:5%;right:5%;bottom:18px;background:#fffaf1;border:3px solid #5b3922;border-radius:16px;padding:15px;z-index:5;box-shadow:0 8px 25px rgba(0,0,0,.2)}
-.scene-dialogue h2{font-size:22px}.scene-dialogue p{margin:7px 0}.scene-buttons{display:flex;gap:8px;flex-wrap:wrap}.scene-buttons button{flex:1;min-width:150px}
-.scene-close{position:absolute;right:18px;top:18px;z-index:6}
-.fullscreen-btn{position:absolute;left:18px;top:18px;z-index:6}
-.rebirth-card{margin-top:18px;border:2px solid #c9a975;background:#f0dfc0;border-radius:14px;padding:16px}.rebirth-card h2{margin-bottom:5px}.rebirth-card p{margin:6px 0 10px;color:#604b38}
-.deal-meter{display:flex;gap:8px;margin:8px 0}.deal-meter span{padding:6px 9px;border-radius:8px;background:#ead3a5;font-size:12px;font-weight:700}
-.inventory{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}.inventory-item{background:#fffdf8;border:1px solid #ddc9a8;border-radius:12px;padding:12px}.inventory-item b{font-size:18px}.inventory-item button{margin-top:8px;width:100%}
-.scene-bubble{position:absolute;left:50%;top:210px;transform:translateX(-50%);background:#fffaf1;border:3px solid #5b3922;border-radius:18px;padding:12px 16px;width:min(440px,78%);text-align:center;z-index:4;box-shadow:0 8px 20px rgba(0,0,0,.18)}
-.scene-bubble:after{content:"";position:absolute;bottom:-14px;left:50%;border:7px solid transparent;border-top-color:#5b3922}
-.market-table{margin-top:16px}
-@media(max-width:800px){.traders-grid{grid-template-columns:1fr}.trade-room{padding:10px}.trade-room-inner{margin:10px auto}}
-.tradebox{margin-top:14px;padding:14px;border-radius:12px;background:#f0dfc0}
-.tradebox select{padding:9px;border:1px solid #c9a975;border-radius:8px;background:#fffaf1;margin:5px 0;width:100%}
-.tradebox .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.price{font-weight:800}
-button{border:0;border-radius:10px;padding:10px 12px;font-weight:700;cursor:pointer;background:var(--site-primary);color:var(--site-on-primary)}
-button.secondary{background:var(--site-secondary);color:var(--site-on-secondary)}
-button:disabled{opacity:.45;cursor:not-allowed}
-.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
-.event{border-left:5px solid var(--site-secondary);background:#f7eddc;padding:13px;border-radius:9px;margin-top:12px}
-.log{max-height:260px;overflow:auto;font-size:13px}
-.log div{padding:8px 0;border-bottom:1px solid #eadbc3}
-.badge{display:inline-block;background:#e9d1a5;padding:5px 8px;border-radius:99px;font-size:12px;font-weight:700}
-footer{margin-top:18px;text-align:center;color:#705b45;font-size:13px}
-@media(max-width:800px){.grid{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.map{height:300px}}
+button,select { font:inherit }
+button {
+  background:var(--gold);
+  color:#241b0e;
+  border:0;
+  padding:11px 14px;
+  border-radius:9px;
+  font-weight:800;
+  cursor:pointer;
+  transition:transform .15s,filter .15s;
+}
+button:hover:not(:disabled) { transform:translateY(-2px);filter:brightness(1.08) }
+button:disabled { opacity:.4;cursor:not-allowed }
+button.secondary { background:#344b40;color:white;border:1px solid #58705f }
+button.danger { background:#733c35;color:white }
+button.small { padding:7px 10px;font-size:13px }
+button:focus-visible { outline:3px solid white;outline-offset:3px }
+header,.panel {
+  background:linear-gradient(145deg,#233a30,#182721);
+  border:1px solid #435b47;
+  border-radius:17px;
+  box-shadow:0 12px 30px #0003;
+}
+header { padding:25px;margin-bottom:18px }
+header h1 { font-size:clamp(27px,5vw,43px);margin:10px 0 5px;line-height:1.1 }
+header p { color:var(--muted);margin:0;line-height:1.6 }
+.kicker,.tag {
+  color:var(--gold);font-size:11px;font-weight:900;
+  letter-spacing:1.5px;text-transform:uppercase
+}
+.wrap { max-width:1200px;margin:auto;padding:20px }
+.layout { display:grid;grid-template-columns:minmax(0,1.55fr) minmax(280px,.85fr);gap:18px }
+.panel { padding:19px;margin-bottom:18px;min-width:0 }
+h2 { font-size:21px;margin:0 0 10px }
+h3 { margin:0 0 7px;font-size:17px }
+p { line-height:1.5 }
+.muted { color:var(--muted);font-size:13px }
+.stats { display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:18px }
+.stat { background:#30463a;border:1px solid #49624b;padding:12px 6px;border-radius:11px;text-align:center }
+.stat span { color:var(--muted);font-size:12px }
+.stat strong { display:block;color:var(--gold);font-size:23px;margin-top:3px;overflow-wrap:anywhere }
+.map {
+  position:relative;overflow:hidden;height:350px;border-radius:13px;
+  border:1px solid #8e8b58;
+  background:
+    radial-gradient(ellipse at 30% 20%,#b4bb79 0 9%,transparent 10%),
+    radial-gradient(ellipse at 70% 72%,#a7b47b 0 14%,transparent 15%),
+    linear-gradient(145deg,#8b9e68,#d2c28d 48%,#a6b17a);
+  color:#292c1c;
+}
+.map:before {
+  content:"";position:absolute;inset:0;opacity:.4;
+  background:repeating-linear-gradient(160deg,transparent 0 30px,#eee0ad 31px 33px,transparent 34px 60px);
+}
+.map svg { position:absolute;inset:0;width:100%;height:100% }
+.map .route { fill:none;stroke:#f7e6ad;stroke-width:12;stroke-linecap:round;opacity:.85 }
+.map .route2 { fill:none;stroke:#8d4f2d;stroke-width:4;stroke-dasharray:5 7;stroke-linecap:round }
+.city { position:absolute;transform:translate(-50%,-50%);text-align:center;font-size:11px;font-weight:900;z-index:2;min-width:68px }
+.city .dot { width:19px;height:19px;border:3px solid #fff7d4;background:#9b4d2d;border-radius:50%;margin:0 auto 4px;box-shadow:0 2px 5px #342b1c }
+.city.active .dot { background:#e2a631;box-shadow:0 0 0 5px #e2a63155,0 2px 5px #342b1c }
+.city.visited .dot { background:#38794d }
+.city:nth-of-type(1) { left:10%;top:73% }
+.city:nth-of-type(2) { left:29%;top:51% }
+.city:nth-of-type(3) { left:49%;top:63% }
+.city:nth-of-type(4) { left:72%;top:34% }
+.city:nth-of-type(5) { left:90%;top:20% }
+.map-caption { position:absolute;bottom:9px;left:9px;background:#fff4d9dd;padding:6px 9px;border-radius:7px;font-size:10px;font-weight:900;z-index:3 }
+.actions { display:flex;gap:9px;flex-wrap:wrap;margin-top:13px }
+.event { padding:12px;border-left:4px solid var(--gold);background:#304237;border-radius:8px;margin-top:13px;font-size:14px;line-height:1.5 }
+.goods { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:14px }
+.good { background:#22352e;border:1px solid #405847;border-radius:12px;padding:12px;min-width:0 }
+.good .emoji { font-size:28px }
+.good h3 { margin:5px 0 }
+.good p { font-size:12px;color:var(--muted);min-height:52px;margin:0 0 10px }
+.price { font-size:12px;line-height:1.8 }
+.buyprice { color:var(--gold);font-weight:800 }
+.sellprice { color:#9dd6a3 }
+.good button { width:100%;margin-top:9px }
+.inventory { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:12px }
+.inv { padding:10px;background:#14221d;border:1px solid #3b5141;border-radius:9px;font-size:12px }
+.inv strong { display:block;font-size:15px;margin-bottom:4px }
+.people { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px }
+.person { padding:13px;background:#22352e;border:1px solid #405847;border-radius:12px }
+.person .avatar { font-size:31px }
+.person p { color:var(--muted);font-size:12px;min-height:36px;margin:5px 0 10px }
+.person button { width:100%;margin-top:5px }
+.row { display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap }
+.progress { height:8px;background:#101b19;border-radius:99px;overflow:hidden;margin:8px 0 14px }
+.progress div { height:100%;background:linear-gradient(90deg,#73a77c,var(--gold));width:50%;transition:width .2s }
+.timer { color:var(--gold);font-weight:900 }
+hr { border:0;border-top:1px solid #405447;margin:17px 0 }
+#tradeModal { display:none;position:fixed;inset:0;z-index:10;background:#07110eeF;overflow:auto;padding:20px }
+.modal { max-width:540px;margin:5vh auto;background:#1a2925;border:1px solid #9d8148;border-radius:17px;padding:22px;box-shadow:0 25px 80px #0009 }
+.modal h2 { color:var(--gold) }
+.deal-options { display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:15px }
+.deal-options button { padding:12px 6px }
+#modalMessage { background:#304237;padding:12px;border-radius:9px;min-height:48px;font-size:14px;margin-top:13px }
+footer { text-align:center;color:var(--muted);font-size:12px;padding:10px 0 25px }
+@media(max-width:850px) {
+  .layout { grid-template-columns:1fr }
+  .goods { grid-template-columns:repeat(2,minmax(0,1fr)) }
+}
+@media(max-width:480px) {
+  .wrap { padding:10px }
+  header,.panel { padding:14px }
+  .stats { grid-template-columns:repeat(2,1fr) }
+  .map { height:280px }
+  .city { font-size:9px;min-width:52px }
+  .goods,.inventory { grid-template-columns:repeat(2,minmax(0,1fr)) }
+  .people { grid-template-columns:1fr }
+  .deal-options { grid-template-columns:1fr }
+}
 </style>
 </head>
 <body>
-<div id="app">
-<div class="shell">
+<div class="wrap">
 <header>
-  <div class="badge">GRADE 8 SOCIAL STUDIES • TRADE SIMULATION</div>
-  <h1>Trade Routes: Merchant's Journey</h1>
-  <p>Travel west along the Silk Roads, trade goods, negotiate prices, and discover how trade connected people and ideas.</p>
+  <div class="kicker">Grade 8 Social Studies • Interactive Simulation</div>
+  <h1>🐪 Trade Routes: Merchant's Journey</h1>
+  <p>Travel the Silk Roads, buy low, sell high, bargain with merchants, and discover how trade connected distant societies through goods, ideas, and culture.</p>
 </header>
 
-<div class="grid">
+<div class="layout">
 <main>
-<section class="card">
+<section class="panel">
   <div class="stats">
-    <div class="stat">Coins<b id="coins">120</b></div>
-    <div class="stat">Silk<b id="silk">0</b></div>
-    <div class="stat">Spices<b id="spices">0</b></div>
-    <div class="stat">Reputation<b id="rep">50</b></div>
+    <div class="stat"><span>🪙 Coins</span><strong id="coins">120</strong></div>
+    <div class="stat"><span>📦 Cargo items</span><strong id="cargo">0</strong></div>
+    <div class="stat"><span>⭐ Reputation</span><strong id="rep">50</strong></div>
+    <div class="stat"><span>🏆 Score</span><strong id="score">0</strong></div>
   </div>
-  <h2 id="location">Chang'an, China</h2>
-  <p id="description">A major eastern starting point of Silk Road trade. Silk and porcelain are valuable exports.</p>
-  <div class="map">
-    <div class="route"></div>
-    <div class="city"><div class="dot"></div>Chang'an</div>
-    <div class="city"><div class="dot"></div>Dunhuang</div>
-    <div class="city"><div class="dot"></div>Samarkand</div>
-    <div class="city"><div class="dot"></div>Baghdad</div>
-    <div class="city"><div class="dot"></div>Mediterranean</div>
+  <div class="row">
+    <div>
+      <div class="tag" id="stopLabel">Stop 1 of 5</div>
+      <h2 id="location">Chang'an, China</h2>
+    </div>
+    <span class="tag" id="rebirthCount">Journey 1</span>
+  </div>
+  <p class="muted" id="description"></p>
+  <div class="map" aria-label="Illustrated Silk Roads map">
+    <svg viewBox="0 0 1000 350" preserveAspectRatio="none" aria-hidden="true">
+      <path class="route" d="M100 255 Q190 190 290 175 T490 215 T720 115 T900 65"/>
+      <path class="route2" d="M100 255 Q190 190 290 175 T490 215 T720 115 T900 65"/>
+    </svg>
+    <div class="city" data-city="0"><div class="dot"></div>Chang'an<br>China</div>
+    <div class="city" data-city="1"><div class="dot"></div>Dunhuang<br>Oasis</div>
+    <div class="city" data-city="2"><div class="dot"></div>Samarkand<br>Central Asia</div>
+    <div class="city" data-city="3"><div class="dot"></div>Baghdad<br>West Asia</div>
+    <div class="city" data-city="4"><div class="dot"></div>Mediterranean<br>Market</div>
+    <div class="map-caption">THE SILK ROADS • EAST → WEST</div>
   </div>
   <div class="actions">
-    <button id="travel">Travel West →</button>
-    <button class="secondary" id="negotiate">Negotiate</button>
-    <button id="eventBtn">Check for an Event</button>
+    <button id="travelBtn" onclick="travel()">🐪 Travel West →</button>
+    <button class="secondary" onclick="randomEvent()">🎲 Journey Event</button>
+    <button class="secondary" onclick="toggleFullscreen()">⛶ Fullscreen</button>
   </div>
-  <div id="event" class="event">Your journey begins. Buy something useful before you travel.</div>
+  <div class="event" id="event">Welcome, merchant! Buy goods here and sell them in another city for a profit.</div>
 </section>
 
-<section class="card" style="margin-top:18px">
-<h2>Marketplace</h2>
-<p>Prices change by location and randomly every 30 seconds. A smart merchant watches the market and buys low or sells high.</p><div class="market-table"><span class="badge">LIVE MARKET</span> <b>Prices refresh every 30 seconds</b> • Next update: <span id="marketTimer">30</span>s</div>
-<div class="goods">
-  <div class="good"><h3>🧵 Silk</h3><p>Famous Chinese textile prized far beyond East Asia.</p><div class="price" id="silkPrice">Buy price: 20 coins</div><div class="price" id="silkSellPrice">Sell value: 17 coins</div><button onclick="buy('silk')">Buy 1</button></div>
-  <div class="good"><h3>🌶️ Spices</h3><p>Valuable trade goods that traveled long distances and connected markets.</p><div class="price" id="spicePrice">Buy price: 55 coins</div><div class="price" id="spiceSellPrice">Sell value: 46 coins</div><button onclick="buy('spices')">Buy 1</button></div>
-  <div class="good"><h3>🏺 Ceramics</h3><p>Decorated pottery carried between cities and prized by wealthy buyers.</p><div class="price" id="ceramicsPrice">Buy price: 32 coins</div><div class="price" id="ceramicsSellPrice">Sell value: 27 coins</div><button onclick="buy('ceramics')">Buy 1</button></div>
-  <div class="good"><h3>🪨 Jade</h3><p>A valuable stone used for art, ornaments, and status.</p><div class="price" id="jadePrice">Buy price: 65 coins</div><div class="price" id="jadeSellPrice">Sell value: 55 coins</div><button onclick="buy('jade')">Buy 1</button></div>
-  <div class="good"><h3>🧂 Salt</h3><p>An everyday necessity that could become valuable far from its source.</p><div class="price" id="saltPrice">Buy price: 14 coins</div><div class="price" id="saltSellPrice">Sell value: 11 coins</div><button onclick="buy('salt')">Buy 1</button></div>
-  <div class="good"><h3>🪶 Dyes</h3><p>Colorful dyes used by textile makers and artisans across the trade routes.</p><div class="price" id="dyesPrice">Buy price: 24 coins</div><div class="price" id="dyesSellPrice">Sell value: 20 coins</div><button onclick="buy('dyes')">Buy 1</button></div>
-</div>
-<div class="inventory">
-  <div class="inventory-item"><b>📦 Your Silk</b><div><span id="sellSilkInfo">0 silk × 0 coins</span></div></div>
-  <div class="inventory-item"><b>🧺 Your Spices</b><div><span id="sellSpiceInfo">0 spices × 0 coins</span></div></div>
-  <div class="inventory-item"><b>🏺 Your Ceramics</b><div><span id="sellCeramicsInfo">0 ceramics × 0 coins</span></div></div>
-  <div class="inventory-item"><b>🪨 Your Jade</b><div><span id="sellJadeInfo">0 jade × 0 coins</span></div></div>
-  <div class="inventory-item"><b>🧂 Your Salt</b><div><span id="sellSaltInfo">0 salt × 0 coins</span></div></div>
-  <div class="inventory-item"><b>🪶 Your Dyes</b><div><span id="sellDyesInfo">0 dyes × 0 coins</span></div></div>
-</div>
-<h2 style="margin-top:20px">People You Meet</h2>
-<div class="people">
-  <div class="person"><div class="avatar">🧑🏽‍🌾</div><h3>Farmer</h3><p>Trades spices for coins.</p><button onclick="roomTrade('Farmer','spices',18)">Trade</button></div>
-  <div class="person"><div class="avatar">🧑🏻‍💼</div><h3>Silk Merchant</h3><p>Wants coins and sells silk.</p><button onclick="roomTrade('Silk Merchant','silk',35)">Trade</button></div>
-  <div class="person"><div class="avatar">🧔🏽</div><h3>Traveler</h3><p>Has goods from another region.</p><button onclick="roomTrade('Traveler','spices',30)">Trade</button></div>
-  <div class="person"><div class="avatar">🧕🏽</div><h3>Spice Dealer</h3><p>Buys spices and knows the best market prices.</p><button onclick="roomSell('Spice Dealer','spices')">Sell Goods</button></div>
-  <div class="person"><div class="avatar">👨🏾‍🎨</div><h3>Artisan</h3><p>Buys silk for workshops and clothing.</p><button onclick="roomSell('Artisan','silk')">Sell Goods</button></div>
-  <div class="person"><div class="avatar">👳🏽‍♂️</div><h3>Caravan Leader</h3><p>Buys useful cargo before heading west.</p><button onclick="roomSell('Caravan Leader','both')">Sell Goods</button></div>
-  <div class="person"><div class="avatar">🧑🏾‍🍳</div><h3>Royal Cook</h3><p>Buys spices for a wealthy household and sells preserved foods.</p><button onclick="roomTrade('Royal Cook','spices',26)">Buy Spices</button><button class="secondary" onclick="roomSell('Royal Cook','spices')">Sell Spices</button></div>
-  <div class="person"><div class="avatar">👩🏽‍🦱</div><h3>Cloth Trader</h3><p>Buys silk and sells fine cloth to passing merchants.</p><button onclick="roomTrade('Cloth Trader','silk',32)">Buy Silk</button><button class="secondary" onclick="roomSell('Cloth Trader','silk')">Sell Silk</button></div>
-  <div class="person"><div class="avatar">🧔🏻</div><h3>Dock Merchant</h3><p>Buys either cargo and sells goods arriving from distant ports.</p><button onclick="roomTrade('Dock Merchant','silk',45)">Buy Goods</button><button class="secondary" onclick="roomSell('Dock Merchant','both')">Sell Goods</button></div>
-  <div class="person"><div class="avatar">👩🏾‍🌾</div><h3>Market Farmer</h3><p>Has spices to sell and buys silk for local markets.</p><button onclick="roomTrade('Market Farmer','spices',22)">Buy Spices</button><button class="secondary" onclick="roomSell('Market Farmer','silk')">Sell Silk</button></div>
-</div>
-<div class="tradehub">
-  <div><div class="tradeicon">🤝</div><h3>Trade</h3><p>Enter the trading room and see who wants to make a deal.</p></div>
-<button onclick="openTradeRoom()">Enter Trading Room →</button>
-</div>
+<section class="panel">
+  <div class="row">
+    <h2>🏪 Marketplace</h2>
+    <span class="timer">Refresh: <span id="timer">15</span>s</span>
+  </div>
+  <p class="muted">Prices change every 15 seconds. Buy goods you think will be worth more farther west. Selling returns the current market value.</p>
+  <div class="goods" id="goods"></div>
+  <hr>
+  <h2>🎒 Your Inventory</h2>
+  <p class="muted">Sell items individually or save them for a different city.</p>
+  <div class="inventory" id="inventory"></div>
+</section>
+
+<section class="panel">
+  <h2>🤝 Meet the Merchants</h2>
+  <p class="muted">Each specialist buys particular goods. Negotiate a price and watch your reputation.</p>
+  <div class="people" id="people"></div>
 </section>
 </main>
 
 <aside>
-<section class="card">
-<h2>Merchant's Log</h2>
-<div id="log" class="log"></div>
+<section class="panel">
+  <h2>🗺️ Your Mission</h2>
+  <p class="muted">Travel east to west and try to finish with as many coins and as much reputation as possible.</p>
+  <div class="row"><span>Route progress</span><strong id="progressText">0%</strong></div>
+  <div class="progress"><div id="progressBar"></div></div>
+  <hr>
+  <h3>Merchant Tips</h3>
+  <p class="muted">• Compare prices between cities.</p>
+  <p class="muted">• Keep some coins for travel and deals.</p>
+  <p class="muted">• Fair offers usually help your reputation.</p>
+  <p class="muted">• Specialist merchants buy different cargo.</p>
 </section>
-<section class="card rebirth-card">
-<h2>🔄 Rebirth</h2>
-<p>Reach 1,000 coins to rebirth. Everything resets, but your next journey starts with 200 coins and higher-value goods.</p>
-<button id="rebirthBtn" onclick="rebirth()">Rebirth — 1,000 coins</button>
+<section class="panel">
+  <h2>🔄 Rebirth</h2>
+  <p class="muted">Reach 1,000 coins to begin another journey. Your goods and coins reset, but prices increase by 25% per rebirth.</p>
+  <button id="rebirthBtn" onclick="rebirth()" disabled>🔒 Need 1,000 coins</button>
 </section>
-<section class="card" style="margin-top:18px">
-<h2>Journey Controls</h2>
-<p>Travel, meet merchants, and make deals to build your reputation.</p>
-<button onclick="resetGame()">Restart Journey</button>
+<section class="panel">
+  <h2>📜 Journey Controls</h2>
+  <p class="muted">Restart to begin again with your original starting funds.</p>
+  <button class="secondary" onclick="resetGame()">↻ Restart Journey</button>
+</section>
+<section class="panel">
+  <h2>🌏 Why Trade Matters</h2>
+  <p class="muted">Trade routes carried silk, spices, ceramics, jade, salt, and dyes. They also helped spread knowledge, inventions, beliefs, languages, and artistic traditions.</p>
 </section>
 </aside>
 </div>
-<footer>Project concept: a classroom simulation showing how trade created contact between societies.</footer>
-</div>
-</div>
-
-<div id="tradeScene" class="trade-scene">
-  <div class="scene-world">
-    <div class="scene-room">
-      <button class="secondary scene-close" onclick="leaveTradeScene()">Leave Trade</button>
-      <button class="fullscreen-btn" onclick="toggleFullscreen()">Fullscreen</button>
-      <div class="scene-window"></div>
-      <div id="sceneBubble" class="scene-bubble">“Welcome, merchant!”</div>
-      <div id="sceneTrader" class="trader-figure"><div class="head">🧔🏽</div><div class="body"></div><h2 id="sceneName">Traveler</h2></div>
-      <div class="scene-chair"></div><div class="scene-table"></div>
-      <div class="scene-dialogue">
-        <span class="badge">FACE-TO-FACE NEGOTIATION</span>
-        <h2 id="sceneSpeech">“Welcome, merchant. What are you offering?”</h2>
-        <p id="sceneOffer">The trader is deciding what price is fair.</p>
-        <div class="deal-meter"><span id="sceneDemand">Asking: —</span><span id="sceneFair">Fair price: —</span><span id="sceneRep">Reputation: 50</span></div>
-        <div class="scene-buttons" id="buyButtons">
-          <button onclick="sceneOfferDeal('low')">Offer a Low Price</button>
-          <button onclick="sceneOfferDeal('fair')">Offer Fair Price</button>
-          <button onclick="sceneOfferDeal('high')">Offer More</button>
-        </div>
-        <div class="scene-buttons" id="sellButtons" style="display:none">
-          <button onclick="sceneSell('low')">Ask Low Price</button>
-          <button onclick="sceneSell('fair')">Ask Fair Price</button>
-          <button onclick="sceneSell('high')">Ask High Price</button>
-        </div>
-      </div>
-    </div>
-  </div>
+<footer>Trade Routes: Merchant's Journey • Classroom trading simulation</footer>
 </div>
 
-<div id="tradeRoom" class="trade-room">
-  <div class="trade-room-inner">
-    <div class="trade-room-top"><div><span class="badge">TRADING ROOM</span><h2>Who wants to trade?</h2><p>Choose a trader, then make your offer face-to-face.</p></div><button class="secondary" onclick="closeTradeRoom()">Leave Room</button></div>
-    <div class="traders-grid">
-      <div class="trader-card"><div class="avatar">🧑🏽‍🌾</div><h3>Farmer</h3><p>Offers spices and wants coins.</p><button onclick="roomTrade('Farmer','spices',18)">Sit & Trade</button></div>
-      <div class="trader-card"><div class="avatar">🧑🏻‍💼</div><h3>Silk Merchant</h3><p>Offers silk and wants coins.</p><button onclick="roomTrade('Silk Merchant','silk',35)">Sit & Trade</button></div>
-      <div class="trader-card"><div class="avatar">🧔🏽</div><h3>Traveler</h3><p>Has goods from another region.</p><button onclick="roomTrade('Traveler','spices',30)">Sit & Trade</button></div>
-      <div class="trader-card"><div class="avatar">🧕🏽</div><h3>Spice Dealer</h3><p>Wants to buy your spices.</p><button onclick="roomSell('Spice Dealer','spices')">Sell Goods</button></div>
-      <div class="trader-card"><div class="avatar">👨🏾‍🎨</div><h3>Artisan</h3><p>Wants your silk for local crafts.</p><button onclick="roomSell('Artisan','silk')">Sell Goods</button></div>
-      <div class="trader-card"><div class="avatar">👳🏽‍♂️</div><h3>Caravan Leader</h3><p>Buys cargo for the next leg.</p><button onclick="roomSell('Caravan Leader','both')">Sell Goods</button></div>
-      <div class="trader-card"><div class="avatar">🧑🏾‍🍳</div><h3>Royal Cook</h3><p>Buys spices for a wealthy household.</p><button onclick="roomTrade('Royal Cook','spices',26)">Buy Spices</button><button class="secondary" onclick="roomSell('Royal Cook','spices')">Sell Spices</button></div>
-      <div class="trader-card"><div class="avatar">👩🏽‍🦱</div><h3>Cloth Trader</h3><p>Buys silk for fine clothing.</p><button onclick="roomTrade('Cloth Trader','silk',32)">Buy Silk</button><button class="secondary" onclick="roomSell('Cloth Trader','silk')">Sell Silk</button></div>
-      <div class="trader-card"><div class="avatar">🧔🏻</div><h3>Dock Merchant</h3><p>Trades cargo from distant ports.</p><button onclick="roomTrade('Dock Merchant','silk',45)">Buy Goods</button><button class="secondary" onclick="roomSell('Dock Merchant','both')">Sell Goods</button></div>
-      <div class="trader-card"><div class="avatar">👩🏾‍🌾</div><h3>Market Farmer</h3><p>Sells spices and buys silk.</p><button onclick="roomTrade('Market Farmer','spices',22)">Buy Spices</button><button class="secondary" onclick="roomSell('Market Farmer','silk')">Sell Silk</button></div>
+<div id="tradeModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal">
+    <div class="row">
+      <span class="tag">FACE-TO-FACE TRADE</span>
+      <button class="secondary small" onclick="closeTrade()">✕ Close</button>
     </div>
-    <div id="roomDeal" class="room-deal"></div>
+    <h2 id="modalTitle">Merchant</h2>
+    <p id="modalDescription" class="muted"></p>
+    <div class="event" id="modalOffer"></div>
+    <div class="deal-options" id="dealOptions"></div>
+    <div id="modalMessage" aria-live="polite">Choose an offer to begin.</div>
   </div>
 </div>
 
 <script>
-const places=[
- {name:"Chang'an, China",desc:"A major eastern starting point of Silk Road trade. Silk, jade, ceramics, and dyes are valuable exports.",silk:20,spices:55,ceramics:32,jade:65,salt:14,dyes:24},
- {name:"Dunhuang",desc:"A desert crossroads where merchants prepared for difficult journeys across Central Asia.",silk:28,spices:48,ceramics:38,jade:58,salt:20,dyes:29},
- {name:"Samarkand",desc:"A Central Asian crossroads where merchants from different regions could meet and exchange goods and ideas.",silk:42,spices:35,ceramics:45,jade:72,salt:12,dyes:34},
- {name:"Baghdad",desc:"A major center of learning and commerce where goods and knowledge moved between regions.",silk:58,spices:26,ceramics:52,jade:78,salt:18,dyes:40},
- {name:"Mediterranean Market",desc:"Your final destination. Sell your goods and see how successful your journey was.",silk:75,spices:20,ceramics:60,jade:90,salt:25,dyes:48}
+"use strict";
+
+const goods = {
+  silk:     {name:"Silk",emoji:"🧵",desc:"A famous textile exported from China.",base:20},
+  spices:   {name:"Spices",emoji:"🌶️",desc:"Valuable seasonings traded across regions.",base:55},
+  ceramics: {name:"Ceramics",emoji:"🏺",desc:"Pottery prized by households and collectors.",base:32},
+  jade:     {name:"Jade",emoji:"💎",desc:"A valued stone used for ornaments and art.",base:65},
+  salt:     {name:"Salt",emoji:"🧂",desc:"An everyday necessity for food and trade.",base:14},
+  dyes:     {name:"Dyes",emoji:"🪶",desc:"Colorful materials used by textile makers.",base:24}
+};
+
+const places = [
+ {name:"Chang'an, China",desc:"A major eastern starting point of Silk Road trade. Silk, jade, ceramics, and dyes are important goods.",prices:{silk:20,spices:55,ceramics:32,jade:65,salt:14,dyes:24}},
+ {name:"Dunhuang Oasis",desc:"A desert crossroads where merchants prepared for journeys through difficult terrain.",prices:{silk:28,spices:48,ceramics:38,jade:58,salt:20,dyes:29}},
+ {name:"Samarkand, Central Asia",desc:"A crossroads where merchants from many regions met and exchanged goods, languages, and ideas.",prices:{silk:42,spices:35,ceramics:45,jade:72,salt:12,dyes:34}},
+ {name:"Baghdad, West Asia",desc:"A major center of commerce and learning where goods and knowledge moved between regions.",prices:{silk:58,spices:26,ceramics:52,jade:78,salt:18,dyes:40}},
+ {name:"Mediterranean Market",desc:"Your final market. Sell your cargo, count your earnings, and complete your journey.",prices:{silk:75,spices:20,ceramics:60,jade:90,salt:25,dyes:48}}
 ];
 
-let state={place:0,coins:120,silk:0,spices:0,ceramics:0,jade:0,salt:0,dyes:0,rep:50,score:0};
-let currentTrade={person:"",good:"silk",price:35};
-let scenePrice=35;
-let marketPrices={silk:20,spices:55,ceramics:32,jade:65,salt:14,dyes:24};
-let marketSeconds=30;
-let rebirthCount=0;
+const merchants = [
+ {name:"Silk Merchant",emoji:"🧑🏻‍💼",good:"silk",type:"buyer",desc:"Buys silk for fine clothing and textiles."},
+ {name:"Spice Dealer",emoji:"🧕🏽",good:"spices",type:"buyer",desc:"Buys spices for markets and wealthy households."},
+ {name:"Pottery Buyer",emoji:"🏺",good:"ceramics",type:"buyer",desc:"Buys ceramics for homes and collectors."},
+ {name:"Jade Collector",emoji:"💎",good:"jade",type:"buyer",desc:"Buys polished jade and ornaments."},
+ {name:"Salt Merchant",emoji:"🧂",good:"salt",type:"buyer",desc:"Buys salt for cooking and preserving food."},
+ {name:"Dye Artisan",emoji:"🎨",good:"dyes",type:"buyer",desc:"Buys dyes for cloth, rugs, and crafts."},
+ {name:"Caravan Trader",emoji:"🐪",good:"all",type:"buyer",desc:"Will consider any good you have in stock."},
+ {name:"Traveling Supplier",emoji:"🧳",good:"all",type:"seller",desc:"Sells one item from your chosen cargo category."}
+];
 
-function refreshMarketPrices(){
- const base=places[state.place];
- const multiplier=1+(rebirthCount*0.25);
+let state;
+let marketPrices = {};
+let timer = 15;
+let rebirths = 0;
+let activeTrade = null;
+let marketInterval = null;
 
- marketPrices.silk=Math.max(8,Math.floor((base.silk+Math.floor(Math.random()*9)-4)*multiplier));
- marketPrices.spices=Math.max(8,Math.floor((base.spices+Math.floor(Math.random()*9)-4)*multiplier));
- marketPrices.ceramics=Math.max(8,Math.floor((base.ceramics+Math.floor(Math.random()*9)-4)*multiplier));
- marketPrices.jade=Math.max(8,Math.floor((base.jade+Math.floor(Math.random()*9)-4)*multiplier));
- marketPrices.salt=Math.max(5,Math.floor((base.salt+Math.floor(Math.random()*7)-3)*multiplier));
- marketPrices.dyes=Math.max(8,Math.floor((base.dyes+Math.floor(Math.random()*9)-4)*multiplier));
-
- marketSeconds=30;
- render();
- log('📈 Market changed! Silk is '+marketPrices.silk+' coins and spices are '+marketPrices.spices+' coins.');
+function newState(coins=120) {
+  return {
+    place:0,coins,silk:0,spices:0,ceramics:0,jade:0,salt:0,dyes:0,
+    rep:50,score:0,finished:false
+  };
 }
 
-setInterval(()=>{
- marketSeconds--;
- document.getElementById('marketTimer').textContent=marketSeconds;
- if(marketSeconds<=0)refreshMarketPrices();
-},1000);
-
-function log(t){
- const el=document.getElementById('log');
- el.innerHTML="<div>"+t+"</div>"+el.innerHTML;
+function basePrice(type) {
+  return places[state.place].prices[type];
 }
 
-function render(){
- const p=places[state.place];
-
- document.getElementById('coins').textContent=state.coins;
- document.getElementById('silk').textContent=state.silk;
- document.getElementById('spices').textContent=state.spices;
- document.getElementById('rep').textContent=state.rep;
-
- document.getElementById('location').textContent=p.name;
- document.getElementById('description').textContent=p.desc;
-
- document.getElementById('sellSilkInfo').textContent=state.silk+' silk × '+sellPrice('silk')+' coins';
- document.getElementById('sellSpiceInfo').textContent=state.spices+' spices × '+sellPrice('spices')+' coins';
-
- document.getElementById('silkPrice').textContent='Buy price: '+marketPrices.silk+' coins';
- document.getElementById('spicePrice').textContent='Buy price: '+marketPrices.spices+' coins';
- document.getElementById('ceramicsPrice').textContent='Buy price: '+marketPrices.ceramics+' coins';
- document.getElementById('jadePrice').textContent='Buy price: '+marketPrices.jade+' coins';
- document.getElementById('saltPrice').textContent='Buy price: '+marketPrices.salt+' coins';
- document.getElementById('dyesPrice').textContent='Buy price: '+marketPrices.dyes+' coins';
-
- document.getElementById('silkSellPrice').textContent='Sell value: '+sellPrice('silk')+' coins';
- document.getElementById('spiceSellPrice').textContent='Sell value: '+sellPrice('spices')+' coins';
- document.getElementById('ceramicsSellPrice').textContent='Sell value: '+sellPrice('ceramics')+' coins';
- document.getElementById('jadeSellPrice').textContent='Sell value: '+sellPrice('jade')+' coins';
- document.getElementById('saltSellPrice').textContent='Sell value: '+sellPrice('salt')+' coins';
- document.getElementById('dyesSellPrice').textContent='Sell value: '+sellPrice('dyes')+' coins';
-
- ['ceramics','jade','salt','dyes'].forEach(t=>{
-   document.getElementById('sell'+t.charAt(0).toUpperCase()+t.slice(1)+'Info').textContent=
-   state[t]+' '+t+' × '+sellPrice(t)+' coins';
- });
-
- document.getElementById('travel').disabled=state.place>=places.length-1;
- document.getElementById('rebirthBtn').disabled=state.coins<1000;
-
- document.getElementById('rebirthBtn').textContent=
- state.coins>=1000
- ?'🔄 Rebirth — 1,000 coins'
- :'🔒 Rebirth — need '+(1000-state.coins)+' more coins';
+function refreshMarket(silent=false) {
+  for (const type of Object.keys(goods)) {
+    const variation = Math.floor(Math.random()*9)-4;
+    const multiplier = 1 + rebirths*0.25;
+    marketPrices[type] = Math.max(5,Math.floor((basePrice(type)+variation)*multiplier));
+  }
+  timer = 15;
+  render();
+  if (!silent) notify("📈 Market prices changed! Check the new prices before trading.");
 }
 
-function rebirth(){
- if(state.coins<1000){
-   flash('You need 1,000 coins to rebirth.');
-   return;
- }
-
- rebirthCount++;
-
- state={
-   place:0,
-   coins:200,
-   silk:0,
-   spices:0,
-   ceramics:0,
-   jade:0,
-   salt:0,
-   dyes:0,
-   rep:50,
-   score:0
- };
-
- marketPrices={
-   silk:30,
-   spices:75,
-   ceramics:44,
-   jade:90,
-   salt:20,
-   dyes:34
- };
-
- marketSeconds=30;
-
- flash('Rebirth complete! You start with 200 coins, no goods, and higher-value markets.');
- log('🔄 Rebirth #'+rebirthCount+': everything reset. Starting coins: 200. Market values increased.');
-
- render();
+function sellPrice(type) {
+  return Math.max(3,Math.floor(marketPrices[type]*0.85));
 }
 
-function buy(type){
- const price=marketPrices[type];
-
- if(state.coins<price){
-   flash("You cannot afford that good.");
-   return;
- }
-
- state.coins-=price;
- state[type]++;
- state.score+=3;
-
- log("Bought 1 "+type+" for "+price+" coins.");
-
- render();
+function cargoCount() {
+  return Object.keys(goods).reduce((total,type)=>total+state[type],0);
 }
 
-function flash(t){
- document.getElementById('event').textContent=t;
+function notify(message) {
+  document.getElementById("event").textContent = message;
 }
 
-function valueOf(type){
- return type==='coins'?1:places[state.place][type];
+function render() {
+  const place = places[state.place];
+  document.getElementById("coins").textContent = state.coins;
+  document.getElementById("cargo").textContent = cargoCount();
+  document.getElementById("rep").textContent = state.rep;
+  document.getElementById("score").textContent = state.score;
+  document.getElementById("location").textContent = place.name;
+  document.getElementById("description").textContent = place.desc;
+  document.getElementById("stopLabel").textContent = `Stop ${state.place+1} of ${places.length}`;
+  document.getElementById("rebirthCount").textContent = `Journey ${rebirths+1}`;
+
+  document.querySelectorAll(".city").forEach((city,index)=>{
+    city.classList.toggle("active",index===state.place);
+    city.classList.toggle("visited",index<state.place);
+  });
+
+  const progress = Math.round(state.place/(places.length-1)*100);
+  document.getElementById("progressText").textContent = progress+"%";
+  document.getElementById("progressBar").style.width = progress+"%";
+  document.getElementById("travelBtn").disabled = state.place===places.length-1 || state.finished;
+  document.getElementById("travelBtn").textContent = state.place===places.length-1 ? "🏁 Journey Complete" : "🐪 Travel West →";
+  document.getElementById("rebirthBtn").disabled = state.coins<1000;
+  document.getElementById("rebirthBtn").textContent = state.coins>=1000 ? "🔄 Begin Rebirth" : `🔒 Need ${1000-state.coins} more coins`;
+
+  document.getElementById("goods").innerHTML = Object.entries(goods).map(([type,g])=>`
+    <div class="good">
+      <div class="emoji">${g.emoji}</div>
+      <h3>${g.name}</h3>
+      <p>${g.desc}</p>
+      <div class="price buyprice">Buy: ${marketPrices[type]} coins</div>
+      <div class="price sellprice">Sell: ${sellPrice(type)} coins</div>
+      <button ${state.finished || state.coins<marketPrices[type] ? "disabled":""} onclick="buy('${type}')">Buy 1 · ${marketPrices[type]} 🪙</button>
+      <button class="secondary" ${state.finished || state[type]<1 ? "disabled":""} onclick="sell('${type}')">Sell 1 · ${sellPrice(type)} 🪙</button>
+    </div>`).join("");
+
+  document.getElementById("inventory").innerHTML = Object.entries(goods).map(([type,g])=>`
+    <div class="inv">
+      <strong>${g.emoji} ${g.name}</strong>
+      <span>${state[type]} owned</span><br>
+      <span class="sellprice">${state[type]*sellPrice(type)} coins total value</span>
+    </div>`).join("");
+
+  document.getElementById("people").innerHTML = merchants.map((m,index)=>`
+    <div class="person">
+      <div class="avatar">${m.emoji}</div>
+      <h3>${m.name}</h3>
+      <p>${m.desc}</p>
+      <button onclick="startTrade(${index})" ${state.finished?"disabled":""}>${m.type==="buyer"?"Sell Goods":"Buy Goods"}</button>
+    </div>`).join("");
+
+  document.getElementById("timer").textContent = timer;
 }
 
-function sellPrice(type){
- return Math.max(4,Math.floor(marketPrices[type]*0.85));
+function buy(type) {
+  if (state.finished) return;
+  const price = marketPrices[type];
+  if (state.coins<price) {
+    notify("You don't have enough coins for that item.");
+    return;
+  }
+  state.coins-=price;
+  state[type]++;
+  state.score+=3;
+  notify(`You bought 1 ${goods[type].name} for ${price} coins. Take it to another market to seek a profit!`);
+  render();
 }
 
-function sellGood(type){
- if(state[type]<1){
-   flash('You do not have any '+type+' to sell.');
-   return;
- }
-
- const price=sellPrice(type);
-
- state[type]--;
- state.coins+=price;
- state.score+=5;
- state.rep=Math.min(100,state.rep+2);
-
- flash('Sold 1 '+type+' for '+price+' coins.');
- log('Sold 1 '+type+' for '+price+' coins.');
-
- render();
+function sell(type) {
+  if (state.finished) return;
+  if (state[type]<1) {
+    notify(`You don't have any ${goods[type].name} to sell.`);
+    return;
+  }
+  const price=sellPrice(type);
+  state[type]--;
+  state.coins+=price;
+  state.score+=5;
+  state.rep=Math.min(100,state.rep+2);
+  notify(`Sold 1 ${goods[type].name} for ${price} coins. Your reputation improved!`);
+  render();
 }
 
-function openTrade(person,good,price){
- currentTrade={person,good,price};
+function travel() {
+  if (state.place>=places.length-1 || state.finished) return;
+  if (state.coins<8) {
+    notify("You need at least 8 coins to pay for the journey to the next city.");
+    return;
+  }
+  state.coins-=8;
+  state.place++;
+  state.score+=5;
+  refreshMarket(true);
+  notify(`You arrived at ${places[state.place].name}. The journey cost 8 coins. Local prices have changed!`);
 
- document.getElementById('tradebox').style.display='block';
- document.getElementById('tradeTitle').textContent='Trade with '+person;
- document.getElementById('receive').value=good;
-
- updateTradeValue();
-
- flash(person+' is ready to negotiate. Choose what you will give and receive.');
+  if (state.place===places.length-1) {
+    const total=Object.keys(goods).reduce((sum,type)=>sum+state[type]*marketPrices[type],0);
+    const items=cargoCount();
+    for (const type of Object.keys(goods)) state[type]=0;
+    state.coins+=total;
+    state.score+=Math.floor(total/10);
+    state.finished=true;
+    notify(`🏁 Journey complete! Your ${items} cargo item(s) sold for ${total} coins. Final coins: ${state.coins}. Final score: ${state.score}.`);
+  }
+  render();
 }
 
-function openTradeRoom(){
- document.getElementById('tradeRoom').style.display='block';
- document.getElementById('roomDeal').style.display='block';
-
- document.getElementById('roomDeal').innerHTML=
- '<b>Trading room:</b> Choose a person above to see their offer and start a deal.';
-
- flash('You entered the trading room. Pick someone to trade with.');
+function randomEvent() {
+  if (state.finished) {
+    notify("Your journey is complete! Rebirth or restart to travel again.");
+    return;
+  }
+  const events=[
+    {text:"A local official collects a 10-coin trade tax.",coins:-10,rep:0,score:2},
+    {text:"A friendly trader shares useful route knowledge. Reputation +5!",coins:0,rep:5,score:4},
+    {text:"You find a new market contact and receive a small reward of 12 coins.",coins:12,rep:1,score:5},
+    {text:"A caravan delay costs 7 coins in extra supplies.",coins:-7,rep:0,score:2},
+    {text:"A shopkeeper recommends your honest trading. Reputation +3!",coins:0,rep:3,score:4},
+    {text:"A festival brings new customers. You earn 8 coins.",coins:8,rep:2,score:4}
+  ];
+  const e=events[Math.floor(Math.random()*events.length)];
+  state.coins=Math.max(0,state.coins+e.coins);
+  state.rep=Math.max(0,Math.min(100,state.rep+e.rep));
+  state.score+=e.score;
+  notify("🎲 "+e.text);
+  render();
 }
 
-function closeTradeRoom(){
- document.getElementById('tradeRoom').style.display='none';
+function startTrade(index) {
+  if (state.finished) return;
+  const merchant=merchants[index];
+  let type=merchant.good;
+
+  if (merchant.type==="buyer") {
+    if (type==="all") {
+      type=Object.keys(goods).find(g=>state[g]>0);
+      if (!type) {
+        notify(`${merchant.name} wants to buy your cargo, but your inventory is empty. Buy some goods first.`);
+        return;
+      }
+    } else if (state[type]<1) {
+      notify(`${merchant.name} wants ${goods[type].name}, but you don't have any. Buy some first.`);
+      return;
+    }
+  } else {
+    type=Object.keys(goods).find(g=>state[g]===0) || "silk";
+    if (state.coins<marketPrices[type]) {
+      notify("You need more coins to buy goods from this supplier.");
+      return;
+    }
+  }
+
+  const selling=merchant.type==="buyer";
+  activeTrade={merchant,type,selling};
+  const price=selling?sellPrice(type):marketPrices[type];
+  const options=document.getElementById("dealOptions");
+  document.getElementById("modalTitle").textContent=merchant.emoji+" "+merchant.name;
+  document.getElementById("modalDescription").textContent=selling
+    ? `${merchant.name} wants your ${goods[type].name}. Choose how much to ask for.`
+    : `${merchant.name} offers ${goods[type].name}. Choose how much you want to pay.`;
+  document.getElementById("modalOffer").textContent=selling
+    ? `Current market value: ${price} coins. You own ${state[type]}.`
+    : `Asking price: ${price} coins. Your balance: ${state.coins} coins.`;
+  const low=Math.max(1,Math.floor(price*0.8));
+  const fair=price;
+  const high=Math.ceil(price*1.15);
+  const choices=selling
+    ? [{label:`Ask ${low} 🪙`,level:"low"},{label:`Ask ${fair} 🪙 · Fair`,level:"fair"},{label:`Ask ${high} 🪙`,level:"high"}]
+    : [{label:`Offer ${low} 🪙`,level:"low"},{label:`Offer ${fair} 🪙 · Fair`,level:"fair"},{label:`Offer ${high} 🪙`,level:"high"}];
+
+  options.innerHTML=choices.map(c=>`<button onclick="completeTrade('${c.level}')">${c.label}</button>`).join("");
+  document.getElementById("modalMessage").textContent="Make a fair offer to improve your reputation.";
+  document.getElementById("tradeModal").style.display="block";
 }
 
-function roomTrade(person,good,price){
- currentTrade={
-   person:person,
-   good:good,
-   price:price
- };
+function completeTrade(level) {
+  if (!activeTrade) return;
+  const {merchant,type,selling}=activeTrade;
+  const price=selling?sellPrice(type):marketPrices[type];
+  const amount=level==="low"?Math.max(1,Math.floor(price*0.8)):level==="high"?Math.ceil(price*1.15):price;
 
- scenePrice=price;
-
- document.getElementById('tradeRoom').style.display='none';
-
- openTradeScene();
+  if (selling) {
+    if (state[type]<1) {
+      document.getElementById("modalMessage").textContent="You no longer have this item to sell.";
+      return;
+    }
+    if (level==="high" && state.rep<60) {
+      document.getElementById("modalMessage").textContent="The merchant refuses the high asking price. Try a fair price or improve your reputation.";
+      state.rep=Math.max(0,state.rep-1);
+      render();
+      return;
+    }
+    state[type]--;
+    state.coins+=amount;
+    state.score+=10;
+    state.rep=Math.min(100,state.rep+(level==="fair"?4:2));
+    document.getElementById("modalMessage").textContent=`Deal accepted! You sold 1 ${goods[type].name} for ${amount} coins.`;
+  } else {
+    if (state.coins<amount) {
+      document.getElementById("modalMessage").textContent="You don't have enough coins for this offer.";
+      return;
+    }
+    if (level==="low" && state.rep<60) {
+      document.getElementById("modalMessage").textContent="The merchant rejects that low offer. Try a fair price or build your reputation.";
+      state.rep=Math.max(0,state.rep-1);
+      render();
+      return;
+    }
+    state.coins-=amount;
+    state[type]++;
+    state.score+=10;
+    state.rep=Math.min(100,state.rep+(level==="fair"?4:level==="high"?1:2));
+    document.getElementById("modalMessage").textContent=`Deal accepted! You bought 1 ${goods[type].name} for ${amount} coins.`;
+  }
+  notify(`${merchant.name}: ${selling?"sold":"bought"} 1 ${goods[type].name} for ${amount} coins.`);
+  render();
+  activeTrade=null;
+  document.getElementById("dealOptions").innerHTML='<button onclick="closeTrade()">Done</button>';
 }
 
-function roomSell(person,good){
- currentTrade={
-   person:person,
-   good:good,
-   price:0,
-   selling:true
- };
-
- document.getElementById('tradeRoom').style.display='none';
-
- openTradeScene();
+function closeTrade() {
+  document.getElementById("tradeModal").style.display="none";
+  activeTrade=null;
 }
 
-function startRoomDeal(){
- openTradeScene();
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    if (document.documentElement.requestFullscreen) {
+      document.documentElement.requestFullscreen().catch(()=>notify("Fullscreen is not available in this browser."));
+    }
+  } else if (document.exitFullscreen) {
+    document.exitFullscreen().catch(()=>{});
+  }
 }
 
-function openTradeScene(){
- const selling=!!currentTrade.selling;
-
- const traderFaces={
-   'Farmer':'🧑🏽‍🌾',
-   'Silk Merchant':'🧑🏻‍💼',
-   'Traveler':'🧔🏽',
-   'Spice Dealer':'🧕🏽',
-   'Artisan':'👨🏾‍🎨',
-   'Caravan Leader':'👳🏽‍♂️',
-   'Royal Cook':'🧑🏾‍🍳',
-   'Cloth Trader':'👩🏽‍🦱',
-   'Dock Merchant':'🧔🏻',
-   'Market Farmer':'👩🏾‍🌾'
- };
-
- document.getElementById('tradeScene').style.display='block';
-
- document.querySelector('#sceneTrader .head').textContent=
- traderFaces[currentTrade.person]||'🧔🏽';
-
- document.getElementById('sceneName').textContent=currentTrade.person;
-
- document.getElementById('buyButtons').style.display=
- selling?'none':'flex';
-
- document.getElementById('sellButtons').style.display=
- selling?'flex':'none';
-
- if(selling){
-   const good=
-   currentTrade.good==='both'
-   ?(state.silk>0?'silk':'spices')
-   :currentTrade.good;
-
-   currentTrade.activeGood=good;
-
-   const base=sellPrice(good);
-
-   scenePrice=base;
-
-   document.getElementById('sceneSpeech').textContent=
-   '“I am looking for '+good+'. How much are you asking for?”';
-
-   document.getElementById('sceneOffer').textContent=
-   'Your asking price changes the trader’s reaction. A fair deal improves your reputation.';
-
-   document.getElementById('sceneDemand').textContent=
-   'Market value: '+base+' coins';
-
-   document.getElementById('sceneFair').textContent=
-   'Fair asking price: '+base+' coins';
-
- }else{
-
-   document.getElementById('sceneSpeech').textContent=
-   '“Welcome, merchant. I have '+currentTrade.good+' to sell. What will you pay?”';
-
-   document.getElementById('sceneOffer').textContent=
-   'The trader wants a fair deal. Your reputation affects how willing they are to negotiate.';
-
-   document.getElementById('sceneDemand').textContent=
-   'Asking: '+scenePrice+' coins';
-
-   document.getElementById('sceneFair').textContent=
-   'Fair price: '+Math.max(1,scenePrice-5)+' coins';
- }
-
- document.getElementById('sceneBubble').textContent=
- selling
- ?'“Let us see if we can agree on a price.”'
- :'“Welcome, merchant. Let us make a deal.”';
-
- document.getElementById('sceneRep').textContent=
- 'Reputation: '+state.rep;
+function rebirth() {
+  if (state.coins<1000) {
+    notify("You need 1,000 coins to rebirth.");
+    return;
+  }
+  rebirths++;
+  state=newState(200);
+  refreshMarket(true);
+  notify(`🔄 Rebirth ${rebirths} complete! You start with 200 coins, no cargo, and market prices are ${rebirths*25}% higher than the original base.`);
+  render();
 }
 
-function leaveTradeScene(){
- document.getElementById('tradeScene').style.display='none';
+function resetGame() {
+  if (!confirm("Restart the journey? Your current coins and cargo will be lost.")) return;
+  state=newState(120);
+  refreshMarket(true);
+  notify("New journey started! You have 120 coins. Buy goods and travel west.");
+  render();
 }
 
-function toggleFullscreen(){
- if(!document.fullscreenElement){
-   document.documentElement.requestFullscreen().catch(()=>{});
- }else{
-   document.exitFullscreen().catch(()=>{});
- }
-}
-
-function sceneOfferDeal(level){
- const fair=Math.max(1,scenePrice-5);
-
- let paid=
- level==='low'
- ?Math.max(1,scenePrice-12)
- :level==='fair'
- ?fair
- :scenePrice+5;
-
- if(state.coins<paid){
-   document.getElementById('sceneSpeech').textContent=
-   '“Sorry, you do not have enough coins for that offer.”';
-   return;
- }
-
- if(level==='low'&&state.rep<60){
-   document.getElementById('sceneSpeech').textContent=
-   '“That price is too low. I cannot accept it.”';
-
-   state.rep=Math.max(0,state.rep-1);
-
-   document.getElementById('sceneOffer').textContent=
-   'Try the fair price or improve your reputation.';
-
-   document.getElementById('sceneRep').textContent=
-   'Reputation: '+state.rep;
-
-   return;
- }
-
- state.coins-=paid;
- state[currentTrade.good]++;
- state.rep=Math.min(100,state.rep+(level==='high'?1:4));
- state.score+=10;
-
- document.getElementById('sceneSpeech').textContent=
- '“Agreed! You drive a fair bargain.”';
-
- document.getElementById('sceneOffer').textContent=
- 'Deal accepted: 1 '+currentTrade.good+' for '+paid+' coins.';
-
- log(
-   'Face-to-face deal with '+currentTrade.person+
-   ': bought 1 '+currentTrade.good+
-   ' for '+paid+' coins.'
- );
-
- document.getElementById('sceneRep').textContent=
- 'Reputation: '+state.rep;
-
- render();
-
- setTimeout(leaveTradeScene,1100);
-}
-
-function sceneSell(level){
- const good=currentTrade.activeGood||currentTrade.good;
-
- if(good==='both'||state[good]<1){
-   document.getElementById('sceneSpeech').textContent=
-   '“You do not have that good to sell.”';
-   return;
- }
-
- const fair=sellPrice(good);
-
- const asking=
- level==='low'
- ?Math.max(1,fair-5)
- :level==='fair'
- ?fair
- :fair+10;
-
- const chance=
- level==='high'&&state.rep<65
- ?false
- :true;
-
- if(!chance){
-   document.getElementById('sceneSpeech').textContent=
-   '“That is more than I can afford. Try a fair price.”';
-
-   state.rep=Math.max(0,state.rep-1);
-
-   document.getElementById('sceneRep').textContent=
-   'Reputation: '+state.rep;
-
-   return;
- }
-
- state[good]--;
- state.coins+=asking;
-
- state.rep=Math.min(
-   100,
-   state.rep+(level==='fair'?4:2)
- );
-
- state.score+=10;
-
- document.getElementById('sceneSpeech').textContent=
- '“Deal! I will buy your '+good+'.”';
-
- document.getElementById('sceneOffer').textContent=
- 'Sold 1 '+good+' for '+asking+' coins.';
-
- log(
-   'Face-to-face sale with '+currentTrade.person+
-   ': sold 1 '+good+
-   ' for '+asking+' coins.'
- );
-
- document.getElementById('sceneRep').textContent=
- 'Reputation: '+state.rep;
-
- render();
-
- setTimeout(leaveTradeScene,1100);
-}
-
-document.getElementById('travel').onclick=()=>{
-
- if(state.place>=places.length-1)return;
-
- state.place++;
-
- state.coins=Math.max(0,state.coins-8);
-
- state.score+=5;
-
- flash(
-   "You arrived safely, but the journey cost 8 coins."
- );
-
- log(
-   "Traveled to "+places[state.place].name+"."
- );
-
- if(state.place===places.length-1){
-
-   const sale=
-   state.silk*75+
-   state.spices*20;
-
-   state.coins+=sale;
-
-   state.score+=Math.floor(sale/10);
-
-   flash(
-     "Final market! Your goods were sold automatically for "+
-     sale+
-     " coins. Final score: "+
-     state.score+"."
-   );
-
-   log(
-     "Final sale earned "+
-     sale+
-     " coins. Your journey is complete."
-   );
- }
-
- render();
-};
-
-document.getElementById('negotiate').onclick=()=>{
-
- const gain=
- Math.floor(Math.random()*11)+5;
-
- state.coins+=gain;
-
- state.rep=Math.min(
-   100,
-   state.rep+2
- );
-
- state.score+=4;
-
- flash(
-   "Successful negotiation! You gained "+
-   gain+
-   " coins and +2 reputation."
- );
-
- log(
-   "Negotiated with a merchant and improved your reputation."
- );
-
- render();
-};
-
-document.getElementById('eventBtn').onclick=()=>{
-
- const events=[
-   ["A local official charges a small trade tax. You pay 10 coins.",-10,0],
-   ["A merchant teaches you a new route. You gain reputation.",0,5],
-   ["Your goods attract a buyer. You gain 18 coins.",18,3],
-   ["A long delay costs supplies. You lose 7 coins.",-7,0]
- ];
-
- const e=
- events[Math.floor(Math.random()*events.length)];
-
- state.coins=
- Math.max(0,state.coins+e[1]);
-
- state.rep=
- Math.min(100,state.rep+e[2]);
-
- state.score+=3;
-
- flash(e[0]);
-
- log(e[0]);
-
- render();
-};
-
-function resetGame(){
-
- state={
-   place:0,
-   coins:120,
-   silk:0,
-   spices:0,
-   ceramics:0,
-   jade:0,
-   salt:0,
-   dyes:0,
-   rep:50,
-   score:0
- };
-
- marketPrices={
-   silk:20,
-   spices:55,
-   ceramics:32,
-   jade:65,
-   salt:14,
-   dyes:24
- };
-
- marketSeconds=30;
-
- document.getElementById('log').innerHTML="";
-
- flash(
-   "Your journey begins. Buy something useful before you travel."
- );
-
- log("Journey restarted.");
-
- render();
-}
-
-log(
- "Welcome, merchant. Your goal is to travel west and make smart trades."
-);
-
+state=newState();
+refreshMarket(true);
 render();
+
+marketInterval=setInterval(()=>{
+  timer--;
+  document.getElementById("timer").textContent=timer;
+  if (timer<=0) refreshMarket();
+},1000);
 </script>
 </body>
 </html>
